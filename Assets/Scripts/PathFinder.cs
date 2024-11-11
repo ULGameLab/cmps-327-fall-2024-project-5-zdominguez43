@@ -33,6 +33,13 @@ public class PathFinder
         goalTile = null;
     }
 
+    List<Tile> allTiles = new List<Tile>();  
+
+    void SetAllTiles(List<Tile> tiles)
+    {
+        allTiles = tiles;  
+    }
+
     // TODO: Find the path based on A-Star Algorithm
     public Queue<Tile> FindPathAStar(Tile start, Tile goal)
     {
@@ -58,7 +65,12 @@ public class PathFinder
             // You just need to fill code inside this foreach only
             foreach (Tile nextTile in current.tile.Adjacents)
             {
-                
+                double cost = current.costSoFar + 1; // add 1 to represent the cost to move 1 tile
+                double priority = cost + HeuristicsDistance(current.tile, goalTile); // F = G + H
+
+                Node nextNode = new Node(nextTile, priority, current, cost); // new node for next tile, with updated values
+
+                TODOList.Add(nextNode); // adds next tile to TODOList
             }
         }
         return new Queue<Tile>(); // Returns an empty Path if no path is found
@@ -92,7 +104,18 @@ public class PathFinder
             // Just increase the F cost of the enemy tile and the tiles around it by a certain ammount (say 30)
             foreach (Tile nextTile in current.tile.Adjacents)
             {
+                double cost = current.costSoFar + 1; // add 1 to represent the cost to move 1 tile
+                double priority = cost + HeuristicsDistance(current.tile, goalTile); // F = G + H
 
+                foreach (Enemy enemy in GameObject.FindObjectsOfType<Enemy>()) { // Loops through all enemies in the scene
+                    // checks if next tile is the same as the enemies current tile, or if its adjacent to it
+                    if(nextTile == enemy.currentTile || enemy.currentTile.Adjacents.Contains(nextTile)) {
+                        cost += 30; // increases cost by 30
+                    }
+                } 
+                Node nextNode = new Node(nextTile, priority, current, cost); // new node for next tile, with updated values
+
+                TODOList.Add(nextNode); // adds next tile to TODOList
             }
         }
         return new Queue<Tile>(); // Returns an empty Path
@@ -161,6 +184,8 @@ public class PathFinder
         }
         return new Queue<Tile>(tileList);
     }
+
+
 
     private void ShuffleTiles<T>(List<T> list)
     {
